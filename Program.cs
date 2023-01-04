@@ -74,7 +74,7 @@ app.MapPost("/handle-fail2ban-webhook", async (Fail2BanWebhook fail2BanWebhook, 
     return Results.Ok("Handled");
 });
 
-app.Run("http://localhost:3411");
+app.Run("http://0.0.0.0:3411");
 
 
 public record Fail2BanWebhook(
