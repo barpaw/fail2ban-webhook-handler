@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "RageshakeWebhookHandler": {
+    "Fail2BanWebhookHandler": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "swagger",
