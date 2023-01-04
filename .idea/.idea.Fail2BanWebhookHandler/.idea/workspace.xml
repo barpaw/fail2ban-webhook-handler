@@ -5,8 +5,9 @@
     <projectFile profileName="IIS Express">Fail2BanWebhookHandler.csproj</projectFile>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="58fe6763-8d73-486a-b015-715202825a73" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.Fail2BanWebhookHandler/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="58fe6763-8d73-486a-b015-715202825a73" name="Changes" comment="init">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Fail2BanWebhookHandler/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Fail2BanWebhookHandler/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,6 +78,7 @@
       <option name="presentableId" value="Default" />
       <updated>1672824098206</updated>
       <workItem from="1672824103059" duration="1518000" />
+      <workItem from="1672825863484" duration="5542000" />
     </task>
     <task id="LOCAL-00001" summary="Init">
       <created>1672825718128</created>
@@ -85,7 +87,14 @@
       <option name="project" value="LOCAL" />
       <updated>1672825718128</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="init">
+      <created>1672825909297</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1672825909297</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -108,6 +117,7 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="Init" />
-    <option name="LAST_COMMIT_MESSAGE" value="Init" />
+    <MESSAGE value="init" />
+    <option name="LAST_COMMIT_MESSAGE" value="init" />
   </component>
 </project>
