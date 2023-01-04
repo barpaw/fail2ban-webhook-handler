@@ -1,7 +1,6 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+EXPOSE 3411
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
@@ -17,4 +16,8 @@ RUN dotnet publish "Fail2BanWebhookHandler.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+USER 65534
+EXPOSE 3411
+ENV ASPNETCORE_URLS=http://*:3411
 ENTRYPOINT ["dotnet", "Fail2BanWebhookHandler.dll"]
