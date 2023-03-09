@@ -1,91 +1,98 @@
-using System.Linq;
-using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
+using Serilog;
+using Fail2BanWebhookHandler.Commands;
+using Fail2BanWebhookHandler.Services;
+using MediatR;
+using Polly;
+using Serilog.Sinks.SystemConsole.Themes;
 
-var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console(theme: AnsiConsoleTheme.Code)
+    .CreateLogger();
+
+try
+{
+    Log.Information("Starting web application");
+
+    var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddHttpClient();
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+    builder.Host.UseSerilog();
+    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
-var app = builder.Build();
+    builder.Services.AddTransient<IEnvironmentService, EnvironmentService>();
+    builder.Services.AddTransient<IMessageService, MessageService>();
+    builder.Services.AddTransient<IApiService, ApiService>();
+
+    builder.Services.AddHttpClient("api")
+        .AddTransientHttpErrorPolicy(policyBuilder =>
+            policyBuilder.WaitAndRetryAsync(
+                10, retryNumber => TimeSpan.FromSeconds(Math.Pow(2, retryNumber))));
+
+    var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.MapGet("/", () => { return Results.Ok("Working"); });
+
+    app.MapGet("/health", () => { return Results.Ok(); });
+
+    app.MapPost("/handle-fail2ban-webhook", async (IMediator mediator, Fail2BanWebhook fail2BanWebhook) =>
+    {
+        var response = await mediator.Send(new HandleFail2BanWebhookCommand(fail2BanWebhook));
+
+        return Results.Ok(response);
+    });
+
+    app.Run("http://0.0.0.0:3411");
+}
+catch (Exception ex)
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
 }
 
-app.MapGet("/", () =>
-{
-    return Results.Ok("Working");
-});
-
-app.MapGet("/health", () =>
-{
-    return Results.Ok();
-});
-
-app.MapPost("/handle-fail2ban-webhook", async (Fail2BanWebhook fail2BanWebhook, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory) =>
-{
-    var logger = loggerFactory.CreateLogger("");
-    
-    logger.LogInformation("{Message}", fail2BanWebhook.Message);
-    
-    var client = httpClientFactory.CreateClient();
-    
-    string matrix_notifier_url = Environment.GetEnvironmentVariable("MATRIX_NOTIFIER_URL");
-    string matrix_notifier_message_header = Environment.GetEnvironmentVariable("MATRIX_NOTIFIER_MESSAGE_HEADER");
-
-    string matrix_homeserver_url = Environment.GetEnvironmentVariable("MATRIX_HOMESERVER_URL");
-    string matrix_homeserver_user = Environment.GetEnvironmentVariable("MATRIX_HOMESERVER_USER");
-    string matrix_homeserver_passwd = Environment.GetEnvironmentVariable("MATRIX_HOMESERVER_PASSWD");
-    string matrix_homeserver_room = Environment.GetEnvironmentVariable("MATRIX_HOMESERVER_ROOM");
-    
-    string matrix_message_footer = Environment.GetEnvironmentVariable("MATRIX_MESSAGE_FOOTER");
-
-    StringBuilder sb = new StringBuilder();
-    
-    sb.Append(matrix_notifier_message_header);
-    sb.Append(Environment.NewLine);
-    sb.Append(Environment.NewLine);
-    sb.Append(fail2BanWebhook.Message);
-    sb.Append(Environment.NewLine);
-    sb.Append("- - -");
-    sb.Append(Environment.NewLine);
-    sb.Append(matrix_message_footer);
-
-    string message = sb.ToString();
-
-    app.Logger.LogInformation(message);
-
-    var matrixNotifierBody = new MatrixNotifier(matrix_homeserver_url, matrix_homeserver_user, matrix_homeserver_passwd, matrix_homeserver_room, message);
-
-    string jsonString = JsonSerializer.Serialize(matrixNotifierBody);
-
-    var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
-
-    await client.PostAsync(matrix_notifier_url, content);
-
-    return Results.Ok("Handled");
-});
-
-app.Run("http://0.0.0.0:3411");
-
-
 public record Fail2BanWebhook(
-    [property: JsonPropertyName("message")] string Message
+    [property: JsonPropertyName("message")]
+    string Message
+);
 
+public record MatrixUserCheck(
+    [property: JsonPropertyName("ip")] string Ip,
+    [property: JsonPropertyName("token")] string Token
 );
 
 public record MatrixNotifier(
-    [property: JsonPropertyName("matrixHomeserverURL")] string MatrixHomeserverURL,
-    [property: JsonPropertyName("matrixHomeserverUser")] string MatrixHomeserverUser,
-    [property: JsonPropertyName("matrixHomeserverPasswd")] string MatrixHomeserverPasswd,
-    [property: JsonPropertyName("matrixHomeserverRoom")] string MatrixHomeserverRoom,
-    [property: JsonPropertyName("message")] string Message
+    [property: JsonPropertyName("matrixHomeserverURL")]
+    string MatrixHomeserverURL,
+    [property: JsonPropertyName("matrixHomeserverUser")]
+    string MatrixHomeserverUser,
+    [property: JsonPropertyName("matrixHomeserverPasswd")]
+    string MatrixHomeserverPasswd,
+    [property: JsonPropertyName("matrixHomeserverRoom")]
+    string MatrixHomeserverRoom,
+    [property: JsonPropertyName("message")]
+    string Message
+);
+
+public record MatrixUserCheckResult(
+    [property: JsonPropertyName("user_id")]
+    string UserId,
+    [property: JsonPropertyName("ip")] string Ip,
+    [property: JsonPropertyName("user_agent")]
+    string UserAgent,
+    [property: JsonPropertyName("last_seen")]
+    string LastSeen
 );
