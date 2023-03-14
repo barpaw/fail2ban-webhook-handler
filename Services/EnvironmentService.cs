@@ -43,7 +43,7 @@ public class EnvironmentService : IEnvironmentService
         var matrixHomeserverRoomCondition =
             matrixHomeserverRoom is not null && matrixHomeserverRoom.Length > 0;
         var matrixMessageFooterCondition =
-            matrixMessageFooter is not null && matrixMessageFooter.Length > 0;
+            matrixMessageFooter is not null;
 
         if (matrixUserCheckApiCondition && matrixUserCheckApiTokenCondition && matrixHomeserverUserCondition &&
             matrixHomeserverPasswdCondition && matrixHomeserverUrlCondition && matrixHomeserverRoomCondition &&
@@ -60,7 +60,7 @@ public class EnvironmentService : IEnvironmentService
             envsDto.MatrixNotifierUrl = matrixNotifierUrl;
             envsDto.MatrixNotifierMessageHeader = matrixNotifierMessageHeader;
             envsDto.MatrixMessageFooter = matrixMessageFooter;
-            
+
             return envsDto;
         }
         else

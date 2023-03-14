@@ -37,15 +37,9 @@ public class ApiService : IApiService
             JsonSerializer.Serialize(new MatrixUserCheck(ipAddress, envsDto.MatrixUserCheckApiToken));
 
         var client = _httpClientFactory.CreateClient("api");
-
-        var request = new HttpRequestMessage
-        {
-            Method = HttpMethod.Get,
-            RequestUri = new Uri(envsDto.MatrixUserCheckApi),
-            Content = new StringContent(jsonStringMatrixUserApi, Encoding.UTF8, MediaTypeNames.Application.Json),
-        };
-
-        var response = await client.SendAsync(request).ConfigureAwait(false);
+        
+        var body = new StringContent(jsonStringMatrixUserApi, Encoding.UTF8, MediaTypeNames.Application.Json);
+        var response = await client.PostAsync(envsDto.MatrixUserCheckApi, body).ConfigureAwait(false);
 
         var encoding = Encoding.ASCII;
 
