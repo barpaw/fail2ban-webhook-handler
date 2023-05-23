@@ -26,6 +26,8 @@ public class EnvironmentService : IEnvironmentService
             Environment.GetEnvironmentVariable("MATRIX_HOMESERVER_USER");
         var matrixHomeserverPasswd =
             Environment.GetEnvironmentVariable("MATRIX_HOMESERVER_PASSWD");
+        var matrixHomeserverDeviceId =
+            Environment.GetEnvironmentVariable("MATRIX_HOMESERVER_DEVICEID");
         var matrixHomeserverRoom =
             Environment.GetEnvironmentVariable("MATRIX_HOMESERVER_ROOM");
         var matrixMessageFooter =
@@ -40,13 +42,14 @@ public class EnvironmentService : IEnvironmentService
         var matrixHomeserverUrlCondition = matrixHomeserverUrl is not null && matrixHomeserverUrl.Length > 0;
         var matrixHomeserverUserCondition = matrixHomeserverUser is not null && matrixHomeserverUser.Length > 0;
         var matrixHomeserverPasswdCondition = matrixHomeserverPasswd is not null && matrixHomeserverPasswd.Length > 0;
+        var matrixHomeserverDeviceIdCondition = matrixHomeserverDeviceId is not null && matrixHomeserverDeviceId.Length > 0;
         var matrixHomeserverRoomCondition =
             matrixHomeserverRoom is not null && matrixHomeserverRoom.Length > 0;
         var matrixMessageFooterCondition =
             matrixMessageFooter is not null;
 
         if (matrixUserCheckApiCondition && matrixUserCheckApiTokenCondition && matrixHomeserverUserCondition &&
-            matrixHomeserverPasswdCondition && matrixHomeserverUrlCondition && matrixHomeserverRoomCondition &&
+            matrixHomeserverPasswdCondition && matrixHomeserverDeviceIdCondition && matrixHomeserverUrlCondition && matrixHomeserverRoomCondition &&
             matrixNotifierUrlCondition && matrixNotifierMessageHeaderCondition && matrixMessageFooterCondition)
         {
             var envsDto = new EnvsDto();
@@ -55,6 +58,7 @@ public class EnvironmentService : IEnvironmentService
             envsDto.MatrixUserCheckApiToken = matrixUserCheckApiToken;
             envsDto.MatrixHomeserverUser = matrixHomeserverUser;
             envsDto.MatrixHomeserverPasswd = matrixHomeserverPasswd;
+            envsDto.MatrixHomeserverDeviceId = matrixHomeserverDeviceId;
             envsDto.MatrixHomeserverUrl = matrixHomeserverUrl;
             envsDto.MatrixHomeserverRoom = matrixHomeserverRoom;
             envsDto.MatrixNotifierUrl = matrixNotifierUrl;
